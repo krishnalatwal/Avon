@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
+import '../../widgets/aven_checkbox_row.dart';
 import '../../widgets/aven_primary_button.dart';
 import '../../widgets/aven_text_field.dart';
 import '../home/home_screen.dart';
@@ -16,14 +17,27 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool _obscurePassword = true;
+  bool _agreedToTerms = false;
+  bool _showTermsError = false;
+
   @override
   void dispose() {
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  String? _validateFullName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Full name is required';
+    }
+    return null;
   }
 
   String? _validateEmail(String? value) {
@@ -44,11 +58,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (value.length < 8) {
       return 'Password must be at least 8 characters';
     }
+    final hasNumberOrSymbol = RegExp(r'[0-9]|[^a-zA-Z0-9]').hasMatch(value);
+    if (!hasNumberOrSymbol) {
+      return 'Include at least one number or symbol';
+    }
     return null;
   }
 
   void _onCreateAccount() {
-    if (_formKey.currentState!.validate()) {
+    final isFormValid = _formKey.currentState!.validate();
+    setState(() => _showTermsError = !_agreedToTerms);
+
+    if (isFormValid && _agreedToTerms) {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => HomeScreen(email: _emailController.text.trim()),
@@ -78,6 +99,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   style: AppTextStyles.subtitle,
                 ),
                 const SizedBox(height: 40),
+                Text('Full name', style: AppTextStyles.fieldLabel),
+                const SizedBox(height: 8),
+                AvenTextField(
+                  controller: _fullNameController,
+                  hintText: 'Your name',
+                  keyboardType: TextInputType.name,
+                  textInputAction: TextInputAction.next,
+                  validator: _validateFullName,
+                ),
+                const SizedBox(height: 20),
                 Text('Email address', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
                 AvenTextField(
@@ -93,17 +124,50 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 AvenTextField(
                   controller: _passwordController,
                   hintText: 'Create a password',
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
                   validator: _validatePassword,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: AppColors.textSecondary,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() => _obscurePassword = !_obscurePassword);
+                    },
+                  ),
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  'Use 8+ characters, with a number or symbol.',
+                  style: AppTextStyles.fieldGuidance,
+                ),
+                const SizedBox(height: 24),
+                AvenCheckboxRow(
+                  value: _agreedToTerms,
+                  onChanged: (value) {
+                    setState(() {
+                      _agreedToTerms = value;
+                      _showTermsError = false;
+                    });
+                  },
+                  label: _TermsLabel(),
+                ),
+                if (_showTermsError) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'You must accept the terms to continue',
+                    style: AppTextStyles.errorText,
+                  ),
+                ],
                 const SizedBox(height: 24),
                 AvenPrimaryButton(
                   label: 'Create account',
                   onPressed: _onCreateAccount,
                 ),
-                const SizedBox(height: 16),
-                _LegalDisclosure(),
                 const SizedBox(height: 40),
                 _ExistingAccountRow(),
               ],
@@ -137,29 +201,28 @@ class _BrandBar extends StatelessWidget {
   }
 }
 
-class _LegalDisclosure extends StatelessWidget {
+class _TermsLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text.rich(
       TextSpan(
-        style: AppTextStyles.legal,
+        style: AppTextStyles.checkboxLabel,
         children: [
-          const TextSpan(text: 'By creating an account, you agree to our'),
+          const TextSpan(text: 'I agree to the '),
           TextSpan(
-            text: ' Terms of Service',
-            style: AppTextStyles.legalLink,
+            text: 'Terms of Service',
+            style: AppTextStyles.checkboxLink,
             recognizer: TapGestureRecognizer()..onTap = () {},
           ),
           const TextSpan(text: ' and '),
           TextSpan(
             text: 'Privacy Policy',
-            style: AppTextStyles.legalLink,
+            style: AppTextStyles.checkboxLink,
             recognizer: TapGestureRecognizer()..onTap = () {},
           ),
           const TextSpan(text: '.'),
         ],
       ),
-      textAlign: TextAlign.center,
     );
   }
 }
