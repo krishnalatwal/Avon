@@ -59,6 +59,34 @@ class AppTextStyles {
         color: Colors.white,
       );
 
+  static TextStyle get fieldGuidance => GoogleFonts.inter(
+        fontSize: 12,
+        height: 1.5,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textSecondary,
+      );
+
+  static TextStyle get checkboxLabel => GoogleFonts.inter(
+        fontSize: 13,
+        height: 1.65,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textSecondary,
+      );
+
+  static TextStyle get checkboxLink => GoogleFonts.inter(
+        fontSize: 13,
+        height: 1.65,
+        fontWeight: FontWeight.w400,
+        color: AppColors.primary,
+      );
+
+  static TextStyle get errorText => GoogleFonts.inter(
+        fontSize: 12,
+        height: 1.5,
+        fontWeight: FontWeight.w400,
+        color: Colors.redAccent,
+      );
+
   static TextStyle get legal => GoogleFonts.inter(
         fontSize: 12,
         height: 1.65,
