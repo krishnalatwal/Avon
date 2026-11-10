@@ -30,10 +30,7 @@ void main() {
     expect(find.text('Full name is required'), findsOneWidget);
     expect(find.text('Email address is required'), findsOneWidget);
     expect(find.text('Password is required'), findsOneWidget);
-    expect(
-      find.text('You must accept the terms to continue'),
-      findsOneWidget,
-    );
+    expect(find.text('You must accept the terms to continue'), findsOneWidget);
   });
 
   testWidgets('Password visibility toggle switches obscureText', (
@@ -49,13 +46,10 @@ void main() {
       matching: find.byType(EditableText),
     );
 
-    expect(
-      tester.widget<EditableText>(editableTextFinder).obscureText,
-      isTrue,
-    );
+    expect(tester.widget<EditableText>(editableTextFinder).obscureText, isTrue);
 
-    await tester.ensureVisible(find.byIcon(Icons.visibility_outlined));
-    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.ensureVisible(find.byIcon(Icons.visibility_outlined).first);
+    await tester.tap(find.byIcon(Icons.visibility_outlined).first);
     await tester.pump();
 
     expect(
@@ -81,8 +75,14 @@ void main() {
       find.widgetWithText(TextFormField, 'Create a password').first,
       'password123',
     );
-    await tester.ensureVisible(find.byType(AvenCheckboxRow));
-    final checkboxTopLeft = tester.getTopLeft(find.byType(AvenCheckboxRow));
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Re-enter your password').first,
+      'password123',
+    );
+    await tester.ensureVisible(find.byType(AvenCheckboxRow).first);
+    final checkboxTopLeft = tester.getTopLeft(
+      find.byType(AvenCheckboxRow).first,
+    );
     await tester.tapAt(checkboxTopLeft + const Offset(12, 12));
     await tester.pump();
 
