@@ -4,16 +4,16 @@ A Flutter registration flow built as a developer-transition learning project. Th
 
 ## Project status
 
-Currently implemented: **Version 2 — Standard registration**
+Currently implemented: **Version 4 — Complete registration** (all four UI milestones done)
 
 | Version | Scope | Status |
 |---|---|---|
 | 1 — Basic | Email, password, create-account action, terms/privacy links, login link | Done |
 | 2 — Standard | Adds full name, password visibility toggle, password guidance, terms acceptance | Done |
-| 3 — Enhanced | Adds Apple/Google sign-in entry points, optional phone number, password-strength feedback | Not started |
-| 4 — Complete | Adds email/phone registration choice, optional recovery phone, confirm password, consent options, supporting guidance | Not started |
+| 3 — Enhanced | Adds Apple/Google sign-in entry points, optional phone number (with a real country picker), password-strength feedback | Done |
+| 4 — Complete | Adds email/phone method selector (visual only — no Phone-primary form is designed yet), recovery phone, confirm password, password requirements checklist, marketing consent, supporting guidance | Done |
 
-No backend is connected yet. Authentication, persistence, email verification, and social sign-in are not implemented — the Apple/Google buttons that will appear in later versions are UI entry points only until Firebase is wired up.
+No backend is connected yet. Authentication, persistence, email verification, and social sign-in are not implemented — the Apple/Google buttons and the email verification/recovery-phone copy are UI only until Firebase is wired up. Backend work (starting with Firebase Authentication) is the next milestone.
 
 ## Project structure
 
@@ -22,13 +22,14 @@ lib/
   main.dart                          # App entry point
   screens/
     registration/
-      registration_screen.dart       # Current registration form (Version 2)
+      registration_screen.dart       # Registration form (Version 4)
     home/
       home_screen.dart                # Placeholder landing screen after submit
   widgets/
     aven_text_field.dart              # Shared styled text input
     aven_primary_button.dart          # Shared primary action button
     aven_checkbox_row.dart            # Shared checkbox + rich-text label row
+    aven_social_button.dart           # Shared Apple/Google entry-point button
   theme/
     app_colors.dart                   # Shared color tokens
     app_text_styles.dart              # Shared text styles
@@ -53,5 +54,5 @@ flutter run            # run on a connected device or simulator
 
 ## Notes
 
-- Dependencies are kept minimal — `google_fonts` is currently the only non-default package, used to match the Figma typography.
+- Dependencies are kept minimal — `google_fonts` (Figma typography) and `country_picker` (international phone country/dial-code selection) are the only non-default packages.
 - See `CLAUDE.md` for the full set of working conventions (design fidelity, milestone pacing, Firebase rules, and Git permissions) followed while building this project.
