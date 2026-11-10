@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
@@ -69,7 +70,9 @@ _PasswordStrengthResult _passwordStrength(String password) {
 }
 
 class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+  const RegistrationScreen({super.key, FirebaseAuth? auth}) : _auth = auth;
+
+  final FirebaseAuth? _auth;
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -82,6 +85,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  late final FirebaseAuth _auth = widget._auth ?? FirebaseAuth.instance;
 
   _RegistrationMethod _method = _RegistrationMethod.email;
   bool _obscurePassword = true;
@@ -89,6 +93,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _agreedToTerms = false;
   bool _showTermsError = false;
   bool _marketingConsent = false;
+  bool _isSubmitting = false;
+  String? _submitError;
   _PasswordStrengthResult _strength = _passwordStrength('');
   Country _selectedCountry = Country.parse('US');
 
@@ -170,16 +176,53 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return null;
   }
 
-  void _onCreateAccount() {
+  Future<void> _onCreateAccount() async {
     final isFormValid = _formKey.currentState!.validate();
     setState(() => _showTermsError = !_agreedToTerms);
 
-    if (isFormValid && _agreedToTerms) {
+    if (!isFormValid || !_agreedToTerms) {
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+      _submitError = null;
+    });
+
+    try {
+      final credential = await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+      await credential.user?.updateDisplayName(_fullNameController.text.trim());
+      await credential.user?.sendEmailVerification();
+
+      if (!mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => HomeScreen(email: _emailController.text.trim()),
         ),
       );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _submitError = _authErrorMessage(e));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  String _authErrorMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'email-already-in-use':
+        return 'An account already exists for this email.';
+      case 'invalid-email':
+        return 'Enter a valid email address.';
+      case 'weak-password':
+        return 'Choose a stronger password.';
+      case 'network-request-failed':
+        return 'Network error. Check your connection and try again.';
+      default:
+        return 'Something went wrong. Please try again.';
     }
   }
 
@@ -498,10 +541,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     style: AppTextStyles.checkboxLabel,
                   ),
                 ),
+                if (_submitError != null) ...[
+                  const SizedBox(height: 12),
+                  Text(_submitError!, style: AppTextStyles.errorText),
+                ],
                 const SizedBox(height: 24),
                 AvenPrimaryButton(
                   label: 'Create account',
                   onPressed: _onCreateAccount,
+                  isLoading: _isSubmitting,
                 ),
                 const SizedBox(height: 14),
                 Row(

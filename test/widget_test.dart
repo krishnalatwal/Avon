@@ -1,3 +1,4 @@
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -61,7 +62,7 @@ void main() {
   testWidgets('Navigates to home screen on valid submit', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const AvonApp());
+    await tester.pumpWidget(AvonApp(firebaseAuth: MockFirebaseAuth()));
 
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Your name').first,
