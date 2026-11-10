@@ -13,6 +13,7 @@ class AvenTextField extends StatelessWidget {
     this.validator,
     this.textInputAction,
     this.suffixIcon,
+    this.prefix,
   });
 
   final TextEditingController controller;
@@ -22,6 +23,7 @@ class AvenTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
   final Widget? suffixIcon;
+  final Widget? prefix;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +40,9 @@ class AvenTextField extends StatelessWidget {
         filled: true,
         fillColor: Colors.white,
         suffixIcon: suffixIcon,
+        prefixIcon: prefix,
         contentPadding: EdgeInsets.only(
-          left: 16,
+          left: prefix != null ? 0 : 16,
           right: suffixIcon != null ? 4 : 16,
         ),
         border: OutlineInputBorder(
