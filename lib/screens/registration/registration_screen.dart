@@ -5,8 +5,65 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../widgets/aven_checkbox_row.dart';
 import '../../widgets/aven_primary_button.dart';
+import '../../widgets/aven_social_button.dart';
 import '../../widgets/aven_text_field.dart';
 import '../home/home_screen.dart';
+
+enum _PasswordStrength { weak, fair, good, strong }
+
+class _PasswordStrengthResult {
+  const _PasswordStrengthResult(
+    this.strength,
+    this.label,
+    this.hint,
+    this.color,
+  );
+
+  final _PasswordStrength strength;
+  final String label;
+  final String hint;
+  final Color color;
+}
+
+_PasswordStrengthResult _passwordStrength(String password) {
+  var score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (RegExp(r'[0-9]').hasMatch(password)) score++;
+  if (RegExp(r'[^a-zA-Z0-9]').hasMatch(password)) score++;
+
+  switch (score) {
+    case 0:
+    case 1:
+      return const _PasswordStrengthResult(
+        _PasswordStrength.weak,
+        'Weak password',
+        'Add a number or symbol',
+        AppColors.strengthWeak,
+      );
+    case 2:
+      return const _PasswordStrengthResult(
+        _PasswordStrength.fair,
+        'Fair password',
+        'Getting better',
+        AppColors.strengthFair,
+      );
+    case 3:
+      return const _PasswordStrengthResult(
+        _PasswordStrength.good,
+        'Good password',
+        'Almost there',
+        AppColors.strengthGood,
+      );
+    default:
+      return const _PasswordStrengthResult(
+        _PasswordStrength.strong,
+        'Strong password',
+        'Nice and secure',
+        AppColors.strengthStrong,
+      );
+  }
+}
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -19,16 +76,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _agreedToTerms = false;
   bool _showTermsError = false;
+  _PasswordStrengthResult _strength = _passwordStrength('');
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(() {
+      setState(() => _strength = _passwordStrength(_passwordController.text));
+    });
+  }
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -47,6 +115,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     if (!emailPattern.hasMatch(value.trim())) {
       return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 10) {
+      return 'Enter a valid phone number';
     }
     return null;
   }
@@ -98,7 +177,48 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   "A few details, and you're ready to go.",
                   style: AppTextStyles.subtitle,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
+                AvenSocialButton(
+                  icon: const Icon(
+                    Icons.apple,
+                    size: 22,
+                    color: AppColors.textPrimary,
+                  ),
+                  label: 'Continue with Apple',
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 12),
+                AvenSocialButton(
+                  icon: Text(
+                    'G',
+                    style: AppTextStyles.fieldLabel.copyWith(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  label: 'Continue with Google',
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Divider(color: AppColors.inputBorder),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Text(
+                        'or sign up with email',
+                        style: AppTextStyles.fieldGuidance,
+                      ),
+                    ),
+                    const Expanded(
+                      child: Divider(color: AppColors.inputBorder),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
                 Text('Full name', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
                 AvenTextField(
@@ -117,6 +237,56 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   validator: _validateEmail,
+                ),
+                const SizedBox(height: 20),
+                Text.rich(
+                  TextSpan(
+                    style: AppTextStyles.fieldLabel,
+                    children: [
+                      const TextSpan(text: 'Phone number'),
+                      TextSpan(
+                        text: ' · Optional',
+                        style: AppTextStyles.fieldGuidance,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                AvenTextField(
+                  controller: _phoneController,
+                  hintText: '(555) 000-0000',
+                  keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.next,
+                  validator: _validatePhone,
+                  prefix: Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 5),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'US +1',
+                          style: AppTextStyles.inputText.copyWith(fontSize: 15),
+                        ),
+                        const SizedBox(width: 5),
+                        const Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 18,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 5),
+                        Container(
+                          width: 1,
+                          height: 24,
+                          color: AppColors.inputBorder,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Only for account recovery.',
+                  style: AppTextStyles.fieldGuidance,
                 ),
                 const SizedBox(height: 20),
                 Text('Password', style: AppTextStyles.fieldLabel),
@@ -140,11 +310,42 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Use 8+ characters, with a number or symbol.',
-                  style: AppTextStyles.fieldGuidance,
+                const SizedBox(height: 10),
+                Row(
+                  children: List.generate(4, (index) {
+                    final filled = index < _strength.strength.index + 1;
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(right: index < 3 ? 5 : 0),
+                        child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: filled
+                                ? _strength.color
+                                : AppColors.inputBorder,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
                 ),
+                if (_passwordController.text.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _strength.label,
+                        style: AppTextStyles.fieldGuidance.copyWith(
+                          color: _strength.color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(_strength.hint, style: AppTextStyles.fieldGuidance),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 24),
                 AvenCheckboxRow(
                   value: _agreedToTerms,
