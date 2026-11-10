@@ -1,17 +1,57 @@
-# shotoregistrationpage
+# Avon Registration App
 
-A new Flutter project.
+A Flutter registration flow built as a developer-transition learning project. The UI is implemented milestone by milestone from four prepared Figma designs, each one adding more registration features on top of the last.
 
-## Getting Started
+## Project status
 
-This project is a starting point for a Flutter application.
+Currently implemented: **Version 2 — Standard registration**
 
-A few resources to get you started if this is your first Flutter project:
+| Version | Scope | Status |
+|---|---|---|
+| 1 — Basic | Email, password, create-account action, terms/privacy links, login link | Done |
+| 2 — Standard | Adds full name, password visibility toggle, password guidance, terms acceptance | Done |
+| 3 — Enhanced | Adds Apple/Google sign-in entry points, optional phone number, password-strength feedback | Not started |
+| 4 — Complete | Adds email/phone registration choice, optional recovery phone, confirm password, consent options, supporting guidance | Not started |
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+No backend is connected yet. Authentication, persistence, email verification, and social sign-in are not implemented — the Apple/Google buttons that will appear in later versions are UI entry points only until Firebase is wired up.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Project structure
+
+```
+lib/
+  main.dart                          # App entry point
+  screens/
+    registration/
+      registration_screen.dart       # Current registration form (Version 2)
+    home/
+      home_screen.dart                # Placeholder landing screen after submit
+  widgets/
+    aven_text_field.dart              # Shared styled text input
+    aven_primary_button.dart          # Shared primary action button
+    aven_checkbox_row.dart            # Shared checkbox + rich-text label row
+  theme/
+    app_colors.dart                   # Shared color tokens
+    app_text_styles.dart              # Shared text styles
+```
+
+## Getting started
+
+Requirements: a stable Flutter SDK install (`flutter --version` to check) with iOS and/or Android tooling set up.
+
+```bash
+flutter pub get      # install dependencies
+flutter analyze       # static analysis
+flutter test          # run tests
+flutter run            # run on a connected device or simulator
+```
+
+## Git workflow
+
+- `main` is the stable branch.
+- Each design milestone lives on its own branch: `version-1-basic`, `version-2-standard`, `version-3-enhanced`, `version-4-complete`.
+- Branches are merged via Pull Request; history is not rewritten or force-pushed.
+
+## Notes
+
+- Dependencies are kept minimal — `google_fonts` is currently the only non-default package, used to match the Figma typography.
+- See `CLAUDE.md` for the full set of working conventions (design fidelity, milestone pacing, Firebase rules, and Git permissions) followed while building this project.
