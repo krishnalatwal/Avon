@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,9 @@ void main() async {
 }
 
 class AvonApp extends StatelessWidget {
-  const AvonApp({super.key});
+  const AvonApp({super.key, this.firebaseAuth});
+
+  final FirebaseAuth? firebaseAuth;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +27,7 @@ class AvonApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
       ),
-      home: const RegistrationScreen(),
+      home: RegistrationScreen(auth: firebaseAuth),
     );
   }
 }
