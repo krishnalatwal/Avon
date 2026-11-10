@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:country_picker/country_picker.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
@@ -83,6 +84,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _agreedToTerms = false;
   bool _showTermsError = false;
   _PasswordStrengthResult _strength = _passwordStrength('');
+  Country _selectedCountry = Country.parse('US');
 
   @override
   void initState() {
@@ -124,10 +126,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       return null;
     }
     final digits = value.replaceAll(RegExp(r'\D'), '');
-    if (digits.length < 10) {
+    if (digits.length < 7 || digits.length > 15) {
       return 'Enter a valid phone number';
     }
     return null;
+  }
+
+  void _openCountryPicker() {
+    showCountryPicker(
+      context: context,
+      onSelect: (country) => setState(() => _selectedCountry = country),
+    );
   }
 
   String? _validatePassword(String? value) {
@@ -258,28 +267,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
                   validator: _validatePhone,
-                  prefix: Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 5),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'US +1',
-                          style: AppTextStyles.inputText.copyWith(fontSize: 15),
-                        ),
-                        const SizedBox(width: 5),
-                        const Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 18,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 5),
-                        Container(
-                          width: 1,
-                          height: 24,
-                          color: AppColors.inputBorder,
-                        ),
-                      ],
+                  prefix: GestureDetector(
+                    onTap: _openCountryPicker,
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 5),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${_selectedCountry.countryCode} +${_selectedCountry.phoneCode}',
+                            style: AppTextStyles.inputText.copyWith(
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          const Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 18,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 5),
+                          Container(
+                            width: 1,
+                            height: 24,
+                            color: AppColors.inputBorder,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
